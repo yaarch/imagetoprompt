@@ -21,29 +21,52 @@
         }
       });
 
-      // Helpful detector if root source folder was deployed to Cloudflare Pages instead of the 'dist' folder
+      // Automatic fallback for static hosting (Cloudflare Pages, GitHub Pages)
+      // If the browser cannot run /src/main.tsx because it was served by static hosting without a Vite dev server,
+      // seamlessly mount the pre-compiled bundle immediately!
+      function loadPrecompiledBundle() {
+        if (window.__BUNDLE_LOADED__) return;
+        window.__BUNDLE_LOADED__ = true;
+
+        var css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = './assets/index.css';
+        css.onerror = function() {
+          css.href = './dist/assets/index.css';
+        };
+        document.head.appendChild(css);
+
+        var js = document.createElement('script');
+        js.type = 'module';
+        js.crossOrigin = 'anonymous';
+        js.src = './assets/index.js';
+        js.onerror = function() {
+          var js2 = document.createElement('script');
+          js2.type = 'module';
+          js2.crossOrigin = 'anonymous';
+          js2.src = './dist/assets/index.js';
+          document.body.appendChild(js2);
+        };
+        document.body.appendChild(js);
+      }
+
+      // 1. Capture module/syntax failure from /src/main.tsx on static hosts
+      window.addEventListener('error', function(e) {
+        var msg = (e && e.message) ? String(e.message) : '';
+        var file = (e && e.filename) ? String(e.filename) : '';
+        if (file.includes('main.tsx') || msg.includes('Failed to resolve') || msg.includes('Unexpected token')) {
+          loadPrecompiledBundle();
+        }
+      }, true);
+
+      // 2. Safety timer: If on a static host and #root has not been mounted by Vite dev server after 400ms
       window.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
           var root = document.getElementById('root');
           if (root && (!root.children || root.children.length === 0)) {
-            var banner = document.createElement('div');
-            banner.id = 'cf-upload-guide';
-            banner.style.cssText = 'position:fixed;inset:0;background:#0a0a0a;color:#f4f4f5;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui,-apple-system,sans-serif;z-index:999999;';
-            banner.innerHTML = '<div style="max-width:540px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:28px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);text-align:center;">' +
-              '<div style="font-size:32px;margin-bottom:12px;">📁</div>' +
-              '<h2 style="font-size:20px;font-weight:700;color:#fff;margin:0 0 8px 0;">Cloudflare Pages Setup Notice</h2>' +
-              '<p style="font-size:14px;color:#a1a1aa;margin:0 0 20px 0;line-height:1.5;">' +
-              'The site is blank because the <strong>entire source project</strong> was uploaded rather than the compiled <strong>dist</strong> folder.' +
-              '</p>' +
-              '<div style="text-align:left;background:#09090b;border:1px solid #3f3f46;border-radius:10px;padding:16px;font-size:13px;color:#e4e4e7;line-height:1.6;">' +
-              '<strong style="color:#fb923c;">To fix this immediately:</strong><br/>' +
-              '1. <strong>Direct Upload (Drag & Drop):</strong> Drag the <code>dist</code> folder inside the project (not the root project folder).<br/>' +
-              '2. <strong>Git on Cloudflare Pages:</strong> Set <em>Build output directory</em> to <code>dist</code> and <em>Build command</em> to <code>npm run build</code>.' +
-              '</div>' +
-              '</div>';
-            document.body.appendChild(banner);
+            loadPrecompiledBundle();
           }
-        }, 1500);
+        }, 400);
       });
     </script>
     <title>Image to Prompt - AI Reverse Prompt Generator</title>
