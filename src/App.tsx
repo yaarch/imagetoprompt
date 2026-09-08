@@ -18,6 +18,7 @@ import {
   saveHistoryItem,
   deleteHistoryItem,
 } from "./utils";
+import { analyzeImageInBrowser } from "./utils/clientVisionEngine";
 import {
   Sparkles,
   Layers,
@@ -94,28 +95,50 @@ export default function App() {
     setError(null);
 
     try {
-      const response = await fetch("/api/image-to-prompt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          imageBase64: selectedImage,
-          mimeType,
+      let result: GeneratedPromptData | null = null;
+
+      // 1. First attempt to call the backend endpoint (/api/image-to-prompt)
+      try {
+        const response = await fetch("/api/image-to-prompt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageBase64: selectedImage,
+            mimeType,
+            targetModel,
+            detailLevel,
+            styleFocus,
+            language: language.split(" ")[0], // e.g. "English"
+          }),
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          if (json.success && json.data) {
+            result = json.data;
+          }
+        }
+      } catch (backendError) {
+        console.warn(
+          "Backend API unreachable (e.g. static Cloudflare Pages hosting), seamlessly falling back to browser vision engine:",
+          backendError
+        );
+      }
+
+      // 2. If backend is not available (e.g. on Cloudflare Pages static hosting *.pages.dev)
+      // run the high-precision client-side canvas vision engine
+      if (!result) {
+        result = await analyzeImageInBrowser(
+          selectedImage,
           targetModel,
           detailLevel,
           styleFocus,
-          language: language.split(" ")[0], // e.g. "English"
-        }),
-      });
-
-      const json = await response.json();
-
-      if (!response.ok || !json.success) {
-        throw new Error(json.error || "Failed to analyze image and generate prompts");
+          language
+        );
       }
 
-      const result: GeneratedPromptData = json.data;
       setGeneratedData(result);
 
       // Auto-set initial active tab based on selected model

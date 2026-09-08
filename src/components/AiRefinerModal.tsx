@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { X, Wand2, Sparkles, ArrowRight, Check } from "lucide-react";
+import { X, Wand2, Sparkles, Check } from "lucide-react";
+import { refinePromptInBrowser } from "../utils/clientVisionEngine";
 
 interface AiRefinerModalProps {
   isOpen: boolean;
@@ -50,14 +51,22 @@ export const AiRefinerModal: React.FC<AiRefinerModalProps> = ({
         }),
       });
 
+      if (!res.ok) {
+        // Fallback for static hosts like Cloudflare Pages
+        const clientResult = refinePromptInBrowser(basePrompt, textToRun, targetModel);
+        setResult(clientResult);
+        return;
+      }
+
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.error || "Failed to refine prompt");
       }
       setResult(data.data);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to contact AI refiner");
+    } catch {
+      // If network fails (e.g. static Cloudflare Pages hosting), run in-browser
+      const clientResult = refinePromptInBrowser(basePrompt, textToRun, targetModel);
+      setResult(clientResult);
     } finally {
       setIsRefining(false);
     }
