@@ -18,6 +18,7 @@ import {
   saveHistoryItem,
   deleteHistoryItem,
 } from "./utils";
+import { PRESET_IMAGES, INITIAL_DEMO_DATA } from "./data/presets";
 import { analyzeImageInBrowser } from "./utils/clientVisionEngine";
 import {
   Sparkles,
@@ -30,10 +31,10 @@ import {
 } from "lucide-react";
 
 export default function App() {
-  // Image state
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  // Image state initialized with demo preset so the app is immediately full of rich content
+  const [selectedImage, setSelectedImage] = useState<string | null>(PRESET_IMAGES[0].thumbnailUrl);
   const [mimeType, setMimeType] = useState<string>("image/jpeg");
-  const [imageTitle, setImageTitle] = useState<string>("Uploaded Visual");
+  const [imageTitle, setImageTitle] = useState<string>(PRESET_IMAGES[0].title);
 
   // Options state
   const [targetModel, setTargetModel] = useState<TargetModel>("all");
@@ -44,7 +45,7 @@ export default function App() {
   // Generation & Result state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [generatedData, setGeneratedData] = useState<GeneratedPromptData | null>(null);
+  const [generatedData, setGeneratedData] = useState<GeneratedPromptData | null>(INITIAL_DEMO_DATA);
   const [activeModelTab, setActiveModelTab] = useState<string>("midjourney");
 
   // History & Modals state
@@ -72,11 +73,39 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedImage, isLoading, targetModel, detailLevel, styleFocus, language]);
 
-  const handleImageSelected = (base64: string, type: string, title?: string) => {
+  const handleImageSelected = async (base64: string, type: string, title?: string, autoAnalyze?: boolean) => {
     setSelectedImage(base64);
     setMimeType(type);
     setImageTitle(title || "Uploaded Visual");
     setError(null);
+
+    if (autoAnalyze) {
+      setIsLoading(true);
+      try {
+        await new Promise((r) => setTimeout(r, 300));
+        const result = await analyzeImageInBrowser(
+          base64,
+          targetModel,
+          detailLevel,
+          styleFocus,
+          language
+        );
+        setGeneratedData(result);
+        const newHistoryItem: HistoryItem = {
+          id: "hist-" + Date.now(),
+          timestamp: Date.now(),
+          imageUrl: base64,
+          title: result.title || title || "Curated Visual",
+          data: result,
+        };
+        const updatedHistory = saveHistoryItem(newHistoryItem);
+        setHistory(updatedHistory);
+      } catch (err: any) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleClearImage = () => {

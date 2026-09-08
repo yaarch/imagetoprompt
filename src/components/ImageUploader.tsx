@@ -7,7 +7,7 @@ import { fileToBase64, urlToBase64 } from "../utils";
 interface ImageUploaderProps {
   selectedImage: string | null;
   mimeType: string;
-  onImageSelected: (base64: string, mimeType: string, title?: string) => void;
+  onImageSelected: (base64: string, mimeType: string, title?: string, autoAnalyze?: boolean) => void;
   onClear: () => void;
   disabled?: boolean;
 }
@@ -117,7 +117,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     try {
       setLoadingPresetId(preset.id);
       const { base64, mimeType } = await urlToBase64(preset.thumbnailUrl);
-      onImageSelected(base64, mimeType, preset.title);
+      onImageSelected(base64, mimeType, preset.title, true);
     } catch (err) {
       console.error("Failed to load preset image", err);
     } finally {
