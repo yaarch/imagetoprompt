@@ -25,12 +25,12 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-lg font-bold tracking-tight text-white font-sans">
                 Image<span className="text-orange-400">Prompt</span>
               </span>
-              <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold text-orange-400 uppercase tracking-wider">
-                Vision AI
+              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">
+                100% Free
               </span>
             </div>
             <p className="hidden text-xs text-neutral-400 sm:block">
-              Reverse Image to Prompt for Midjourney, Flux & Stable Diffusion
+              Reverse Image to Prompt for Midjourney, Flux & Stable Diffusion (Runs 100% In-Browser)
             </p>
           </div>
         </div>

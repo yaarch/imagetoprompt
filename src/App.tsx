@@ -95,49 +95,15 @@ export default function App() {
     setError(null);
 
     try {
-      let result: GeneratedPromptData | null = null;
-
-      // 1. First attempt to call the backend endpoint (/api/image-to-prompt)
-      try {
-        const response = await fetch("/api/image-to-prompt", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            imageBase64: selectedImage,
-            mimeType,
-            targetModel,
-            detailLevel,
-            styleFocus,
-            language: language.split(" ")[0], // e.g. "English"
-          }),
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-          if (json.success && json.data) {
-            result = json.data;
-          }
-        }
-      } catch (backendError) {
-        console.warn(
-          "Backend API unreachable (e.g. static Cloudflare Pages hosting), seamlessly falling back to browser vision engine:",
-          backendError
-        );
-      }
-
-      // 2. If backend is not available (e.g. on Cloudflare Pages static hosting *.pages.dev)
-      // run the high-precision client-side canvas vision engine
-      if (!result) {
-        result = await analyzeImageInBrowser(
-          selectedImage,
-          targetModel,
-          detailLevel,
-          styleFocus,
-          language
-        );
-      }
+      // 100% Free In-Browser Vision Engine: analyzes image instantly without any external API keys or server
+      await new Promise((r) => setTimeout(r, 350));
+      const result = await analyzeImageInBrowser(
+        selectedImage,
+        targetModel,
+        detailLevel,
+        styleFocus,
+        language
+      );
 
       setGeneratedData(result);
 

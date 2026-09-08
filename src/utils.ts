@@ -14,17 +14,47 @@ export async function fileToBase64(file: File): Promise<{ base64: string; mimeTy
 }
 
 export async function urlToBase64(url: string): Promise<{ base64: string; mimeType: string }> {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve({ base64: result, mimeType: blob.type || "image/jpeg" });
-    };
-    reader.onerror = (error) => reject(error);
-  });
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Fetch failed");
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve({ base64: result, mimeType: blob.type || "image/jpeg" });
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  } catch {
+    // If CORS or network blocks direct blob fetch, load via Image object
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth || 800;
+          canvas.height = img.naturalHeight || 600;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+            resolve({ base64: dataUrl, mimeType: "image/jpeg" });
+            return;
+          }
+        } catch {
+          // Tainted canvas fallback
+        }
+        resolve({ base64: url, mimeType: "image/jpeg" });
+      };
+      img.onerror = () => {
+        resolve({ base64: url, mimeType: "image/jpeg" });
+      };
+      img.src = url;
+    });
+  }
 }
 
 const HISTORY_KEY = "imagetoprompt_history_v1";

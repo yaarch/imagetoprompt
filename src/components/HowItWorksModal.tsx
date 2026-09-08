@@ -85,7 +85,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({
                 <span>Privacy First</span>
               </h5>
               <p className="text-xs text-neutral-400">
-                Uploaded images are streamed directly into the vision model in memory and are never retained, sold, or shared on server disks.
+                All visual analysis executes 100% locally inside your browser using HTML5 Canvas and color-space extraction algorithms. Your images never leave your device or get sent to any server. 100% Free, Private, and Offline-ready.
               </p>
             </div>
           </div>

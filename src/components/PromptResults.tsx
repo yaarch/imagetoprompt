@@ -111,7 +111,7 @@ export const PromptResults: React.FC<PromptResultsProps> = ({
             className="flex items-center gap-1.5 rounded-lg border border-orange-500/40 bg-orange-500/10 px-3 py-1.5 text-xs font-semibold text-orange-300 hover:bg-orange-500/20 hover:text-white transition-colors"
           >
             <Wand2 className="h-3.5 w-3.5" />
-            <span>Edit with AI</span>
+            <span>Refine Prompt</span>
           </button>
 
           <div className="flex items-center gap-1">

@@ -171,7 +171,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
             ))}
           </select>
           <p className="mt-1.5 text-[11px] text-neutral-500">
-            AI can craft prompts and breakdowns in your preferred tongue
+            Extracts prompts and breakdowns in your preferred language
           </p>
         </div>
       </div>
@@ -194,19 +194,19 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
           {isLoading ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              <span>Reverse Engineering Image Visuals...</span>
+              <span>Analyzing Image & Synthesizing Prompts...</span>
             </>
           ) : (
             <>
               <Sparkles className="h-4 w-4" />
-              <span>Generate AI Prompts</span>
+              <span>Generate Prompts Instantly</span>
               <Wand2 className="h-4 w-4 text-orange-200" />
             </>
           )}
         </button>
         <div className="flex items-center justify-center gap-1.5 text-[11px] text-neutral-400">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-          <span>100% Free API • No credits, tokens, or subscription required</span>
+          <span>100% Free In-Browser • Works on Cloudflare Pages • No API Key Needed</span>
         </div>
       </div>
     </div>

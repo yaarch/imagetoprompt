@@ -41,32 +41,11 @@ export const AiRefinerModal: React.FC<AiRefinerModalProps> = ({
     setResult(null);
 
     try {
-      const res = await fetch("/api/refine-prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          basePrompt,
-          instruction: textToRun,
-          targetModel,
-        }),
-      });
-
-      if (!res.ok) {
-        // Fallback for static hosts like Cloudflare Pages
-        const clientResult = refinePromptInBrowser(basePrompt, textToRun, targetModel);
-        setResult(clientResult);
-        return;
-      }
-
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.error || "Failed to refine prompt");
-      }
-      setResult(data.data);
-    } catch {
-      // If network fails (e.g. static Cloudflare Pages hosting), run in-browser
+      await new Promise((r) => setTimeout(r, 200));
       const clientResult = refinePromptInBrowser(basePrompt, textToRun, targetModel);
       setResult(clientResult);
+    } catch (err: any) {
+      setError(err?.message || "Failed to refine prompt");
     } finally {
       setIsRefining(false);
     }
@@ -89,9 +68,9 @@ export const AiRefinerModal: React.FC<AiRefinerModalProps> = ({
               <Wand2 className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Edit with AI</h3>
+              <h3 className="text-base font-bold text-white">Refine & Remix Prompt</h3>
               <p className="text-xs text-neutral-400">
-                Describe desired changes to tune or transform the prompt
+                Instantly adjust lighting, style, camera angles, or mood (100% Free & In-Browser)
               </p>
             </div>
           </div>
