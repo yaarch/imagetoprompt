@@ -3,6 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Suppress noisy third-party browser extension errors (MetaMask, Phantom, etc.) injected into iframes
+      window.addEventListener('unhandledrejection', function(e) {
+        var r = (e && e.reason) ? (e.reason.message || String(e.reason)) : '';
+        if (/MetaMask|ethereum|solana|chrome-extension|moz-extension/i.test(r)) {
+          e.preventDefault && e.preventDefault();
+          e.stopImmediatePropagation && e.stopImmediatePropagation();
+        }
+      });
+      window.addEventListener('error', function(e) {
+        var m = (e && e.message) ? String(e.message) : '';
+        var f = (e && e.filename) ? String(e.filename) : '';
+        if (/MetaMask|ethereum|solana/i.test(m) || /chrome-extension|moz-extension/i.test(f)) {
+          e.preventDefault && e.preventDefault();
+          e.stopImmediatePropagation && e.stopImmediatePropagation();
+        }
+      });
+    </script>
     <title>Image to Prompt - AI Reverse Prompt Generator</title>
     <meta name="description" content="AI-powered image-to-prompt generator that converts images into detailed Midjourney, Stable Diffusion, Flux, and DALL-E prompts." />
     <meta property="og:title" content="Image to Prompt - AI Reverse Prompt Generator" />
